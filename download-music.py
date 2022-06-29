@@ -11,7 +11,7 @@ from mutagen.mp4 import MP4, MP4Cover
 
 
 musicDownloadPath = r"C:\Users\Jonathan\Downloads\Music"
-musicArchivePath = r"D:\media\Music\music-archive.txt"
+musicArchivePath = r"D:\media\Music\secular\music-archive.txt"
 outputMusicPath = r"C:\Users\Jonathan\Music"
 picardExePath = r"C:\Program Files\MusicBrainz Picard\picard.exe"
 mp3tagExePath = r"C:\Program Files (x86)\Mp3tag\Mp3tag.exe"
