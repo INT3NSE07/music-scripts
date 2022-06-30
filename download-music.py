@@ -9,9 +9,10 @@ from shutil import copy
 from wand.image import Image
 from mutagen.mp4 import MP4, MP4Cover
 
-
+musicType = 'gospel'
 musicDownloadPath = r"C:\Users\Jonathan\Downloads\Music"
-musicArchivePath = r"D:\media\Music\secular\music-archive.txt"
+musicArchiveFileName = f"music-archive-{musicType}.txt"
+musicArchivePath = os.path.join(r"D:\media\Music", musicType, musicArchiveFileName)
 outputMusicPath = r"C:\Users\Jonathan\Music"
 picardExePath = r"C:\Program Files\MusicBrainz Picard\picard.exe"
 mp3tagExePath = r"C:\Program Files (x86)\Mp3tag\Mp3tag.exe"
@@ -22,7 +23,7 @@ outputExt = "m4a"
 thumbnailExt = "png"
 croppedAlbumArtSuffix = f"-updated.{thumbnailExt}"
 logFileName = "log.txt"
-ignoredFiles = ["desktop.ini", "music-archive.txt", logFileName]
+ignoredFiles = ["desktop.ini", musicArchiveFileName, logFileName]
 
 AAC_ARTIST = "©ART"
 AAC_ALBUM = "©alb"
@@ -31,8 +32,11 @@ AAC_ALBUMART = "covr"
 
 def main():
     try:
-        # if [file for file in os.listdir(outputMusicPath) if not file in ignoredFiles] != []:
-        #     sys.exit(f"Make sure {outputMusicPath} is empty")
+        if not musicType:
+            sys.exit(f"musicType is not set")
+
+        if [file for file in os.listdir(outputMusicPath) if not file in ignoredFiles] != []:
+            sys.exit(f"Make sure {outputMusicPath} is empty")
 
         Path(musicDownloadPath).mkdir(exist_ok=True)
         logfile = open(os.path.join(musicDownloadPath, logFileName), 'w+')
@@ -42,7 +46,7 @@ def main():
         # automatically crop to square thumbnail
         # mkdir _%(album)q cmd fails if album name contains quotes which is being delimited by \
         # slice the thumbnail filepath by len(thumbnailExt) + 1 to remove the file extension and the period
-        ytDlCmd = f"yt-dlp --download-archive music-archive.txt --extract-audio --audio-format \"{outputExt}\" --embed-thumbnail --convert-thumbnails {thumbnailExt} --exec-before-download \"ffmpeg -i %(thumbnails.-1.filepath)q -q:v 1 -vf crop=\\\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\" %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix}\" --exec-before-download \"mv %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix} %(thumbnails.-1.filepath)q\" --cookies-from-browser chrome --add-metadata -o \"%(album)s/%(title)s.%(ext)s\" --parse-metadata \"%(release_date>%Y-%m-%d)s:%(meta_date)s\" \"{ytDlUrl}\""
+        ytDlCmd = f"yt-dlp --download-archive {musicArchiveFileName} --extract-audio --audio-format \"{outputExt}\" --embed-thumbnail --convert-thumbnails {thumbnailExt} --exec-before-download \"ffmpeg -i %(thumbnails.-1.filepath)q -q:v 1 -vf crop=\\\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\" %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix}\" --exec-before-download \"mv %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix} %(thumbnails.-1.filepath)q\" --cookies-from-browser chrome --add-metadata -o \"%(album)s/%(title)s.%(ext)s\" --parse-metadata \"%(release_date>%Y-%m-%d)s:%(meta_date)s\" \"{ytDlUrl}\""
 
         print(f"Executing {ytDlCmd}")
         subprocess.call(ytDlCmd, shell=True,
@@ -70,8 +74,9 @@ def main():
             if not os.path.exists(albumArtPath):
                 albumArtDownloaderArgs = f"-artist \"{artist}\" -album \"{album}\" -path \"{albumArtPath}\" -autoclose -sort size -minSize 1200 -maxSize 1500 -coverType front"
                 albumArtDownloaderCmd = f"\"{albumArtDownloaderExePath}\" {albumArtDownloaderArgs}"
-                subprocess.call(albumArtDownloaderCmd, shell=True,
+                subprocess.Popen(albumArtDownloaderCmd, shell=True,
                                 stdout=logfile, stderr=logfile)
+                input("Download album art from albumartdownloader. Press enter once done: ")
 
             # Could not find suitable album art, so manually download from itunes or other sources
             if not os.path.exists(albumArtPath):
@@ -101,7 +106,7 @@ def main():
         subprocess.call(mp3tagExePath, shell=True,
                         stdout=logfile, stderr=logfile)
 
-        print(f"Manually copy back music-archive to {musicArchivePath}")
+        print(f"Manually copy back {musicArchiveFileName} to {musicArchivePath}")
     except Exception as e:
         print(e)
         traceback.print_stack()
