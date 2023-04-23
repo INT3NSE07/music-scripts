@@ -9,7 +9,7 @@ from shutil import copy
 from wand.image import Image
 from mutagen.mp4 import MP4, MP4Cover
 
-musicType = 'gospel'
+musicType = 'secular'
 musicDownloadPath = r"C:\Users\Jonathan\Downloads\Music"
 musicArchiveFileName = f"music-archive-{musicType}.txt"
 musicArchivePath = os.path.join(r"D:\media\Music", musicType, musicArchiveFileName)
@@ -32,35 +32,35 @@ AAC_ALBUMART = "covr"
 
 def main():
     try:
-        if not musicType:
-            sys.exit(f"musicType is not set")
+        # if not musicType:
+        #     sys.exit(f"musicType is not set")
 
-        if [file for file in os.listdir(outputMusicPath) if not file in ignoredFiles] != []:
-            sys.exit(f"Make sure {outputMusicPath} is empty")
+        # if [file for file in os.listdir(outputMusicPath) if not file in ignoredFiles] != []:
+        #     sys.exit(f"Make sure {outputMusicPath} is empty")
 
-        Path(musicDownloadPath).mkdir(exist_ok=True)
+        # Path(musicDownloadPath).mkdir(exist_ok=True)
         logfile = open(os.path.join(musicDownloadPath, logFileName), 'w+')
-        copy(musicArchivePath, musicDownloadPath)
-        os.chdir(musicDownloadPath)
+        # copy(musicArchivePath, musicDownloadPath)
+        # os.chdir(musicDownloadPath)
 
-        # automatically crop to square thumbnail
-        # mkdir _%(album)q cmd fails if album name contains quotes which is being delimited by \
-        # slice the thumbnail filepath by len(thumbnailExt) + 1 to remove the file extension and the period
-        ytDlCmd = f"yt-dlp --download-archive {musicArchiveFileName} --extract-audio --audio-format \"{outputExt}\" --embed-thumbnail --convert-thumbnails {thumbnailExt} --exec-before-download \"ffmpeg -i %(thumbnails.-1.filepath)q -q:v 1 -vf crop=\\\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\" %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix}\" --exec-before-download \"mv %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix} %(thumbnails.-1.filepath)q\" --cookies-from-browser chrome --add-metadata -o \"%(album)s/%(title)s.%(ext)s\" --parse-metadata \"%(release_date>%Y-%m-%d)s:%(meta_date)s\" \"{ytDlUrl}\""
+        # # automatically crop to square thumbnail
+        # # mkdir _%(album)q cmd fails if album name contains quotes which is being delimited by \
+        # # slice the thumbnail filepath by len(thumbnailExt) + 1 to remove the file extension and the period
+        # ytDlCmd = f"yt-dlp --download-archive {musicArchiveFileName} --extract-audio --audio-format \"{outputExt}\" --embed-thumbnail --convert-thumbnails {thumbnailExt} --exec-before-download \"ffmpeg -i %(thumbnails.-1.filepath)q -q:v 1 -vf crop=\\\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\" %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix}\" --exec-before-download \"mv %(thumbnails.-1.filepath.:-{len(thumbnailExt) + 1})q{croppedAlbumArtSuffix} %(thumbnails.-1.filepath)q\" --cookies-from-browser chrome --add-metadata -o \"%(album)s/%(title)s.%(ext)s\" --parse-metadata \"%(release_date>%Y-%m-%d)s:%(meta_date)s\" \"{ytDlUrl}\""
 
-        print(f"Executing {ytDlCmd}")
-        subprocess.call(ytDlCmd, shell=True,
-                        stdout=logfile, stderr=logfile)
+        # print(f"Executing {ytDlCmd}")
+        # subprocess.call(ytDlCmd, shell=True,
+        #                 stdout=logfile, stderr=logfile)
 
-        # Open picard to auto-tag recognized music
-        # Make sure that each file has album and artist values
-        # For untagged music, make sure to also save those files which will move all music from {musicDownloadPath} folder to {outputMusicPath}
-        subprocess.call(picardExePath, shell=True,
-                        stdout=logfile, stderr=logfile)
+        # # Open picard to auto-tag recognized music
+        # # Make sure that each file has album and artist values
+        # # For untagged music, make sure to also save those files which will move all music from {musicDownloadPath} folder to {outputMusicPath}
+        # subprocess.call(picardExePath, shell=True,
+        #                 stdout=logfile, stderr=logfile)
 
-        if [file for file in os.listdir(musicDownloadPath) if not file in ignoredFiles] != []:
-            sys.exit(
-                f"All untagged files should be saved in picard so that they are moved to {outputMusicPath}")
+        # if [file for file in os.listdir(musicDownloadPath) if not file in ignoredFiles] != []:
+        #     sys.exit(
+        #         f"All untagged files should be saved in picard so that they are moved to {outputMusicPath}")
 
         for filePath in glob(os.path.join(outputMusicPath, f'**\*.{outputExt}'), recursive=True):
             aacFile = MP4(filePath)
