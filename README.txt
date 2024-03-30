@@ -8,6 +8,7 @@ Run
 .\venv\Scripts\Activate.ps1
 
 # Disable cookies db lock
+taskkill /f /im msedge.exe
 cd "C:\Program Files (x86)\Microsoft\Edge\Application\"
 .\msedge.exe  --disable-features=LockProfileCookieDatabase
 
